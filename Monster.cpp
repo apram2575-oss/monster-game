@@ -1,7 +1,6 @@
 #include "Monster.h"
 
 
-Monster::~Monster() {}
 
 Monster::Monster(string name, int health, int strength) : name(name), health(health), strength(strength) {}
 
