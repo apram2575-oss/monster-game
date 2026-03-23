@@ -7,4 +7,5 @@ add_executable(main
     main.cpp
     Monster.cpp
     Character.cpp
+    Enemy.cpp
 )

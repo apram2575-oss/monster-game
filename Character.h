@@ -1,10 +1,12 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <iostream>
+#include "Monster.h"
 
 using namespace std;
 
-class Monster {
+class Character {
 
 public:
 Character(string name);
@@ -18,9 +20,9 @@ void addMonster(Monster* monster);
 void swapMonster(int index, Monster* newMonster);
 void removeDefeatedMonsters();
 
-~Character();
+virtual ~Character();
 
-private:
+protected:
 string name;
 vector<Monster*> monsters;
 
