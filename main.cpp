@@ -14,7 +14,7 @@ Character* createCharacter()
     player->addMonster(new Monster("Wolf", 20, 5));
     player->addMonster(new Monster("Bear", 30, 10));
 
-    cout << "Welcome " << player->getName() << " you start with a wolf and a bear!" << endl;
+    cout << "Welcome " << player->getName() << "! You start with a wolf and a bear!" << endl;
     return player;
 }
 
@@ -22,7 +22,6 @@ void mainMenu(Character* player)
 {
     while (true)
     {
-    cout << "Welcome to the Monster Battle Game!" << endl;
     cout << "--- Main Menu ---" << endl;
     cout << "1. New Game" << endl;
     cout << "2. Quit" << endl;
@@ -63,12 +62,13 @@ void mainMenu(Character* player)
 }
 
 int main() 
-{ 
-    
-    
-    
+{     
     // Main game loop
     cout << "Welcome to the Monster Battle Game!" << endl;
+    Character* player = nullptr;
+    mainMenu(player);
+
+
 
     return 0;
 }
