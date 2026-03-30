@@ -105,6 +105,17 @@ void Monster::effectStatus()
             cout << name << " is no longer burning!" << endl;
         }
     }
+    else if (currentStatus == "bleeding" && statusDuration > 0) 
+    {
+        health -= 7; 
+        cout << name << " takes 7 bleeding damage!" << endl;
+        statusDuration--;
+        if (statusDuration == 0) 
+        {
+            currentStatus = "";
+            cout << name << " is no longer bleeding!" << endl;
+        }
+    }
 }
 
 Monster::~Monster() {}
