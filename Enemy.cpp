@@ -2,12 +2,9 @@
 #include <iostream>
 #include <cstdlib>
 
-Enemy::Enemy(string name, int difficulty, string area) : Character(name), difficulty(difficulty), area(area) {}
+Enemy::Enemy(string name, string area) : Character(name), area(area) {}
 
-int Enemy::getDifficulty() const 
-{
-    return difficulty;
-}
+
 
 string Enemy::getArea() const 
 {

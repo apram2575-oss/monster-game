@@ -9,7 +9,7 @@ class Enemy : public Character {
 
 public:
 
-Enemy(string name, int difficulty, string area);
+Enemy(string name, string area);
 int getDifficulty() const;
 string getArea() const;
 

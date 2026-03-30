@@ -9,4 +9,5 @@ add_executable(main
     Character.cpp
     Enemy.cpp
     Area.cpp
+    GameData.cpp
 )
