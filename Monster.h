@@ -10,12 +10,14 @@ string getName() const;
 int getHealth() const;
 int getStrength() const;
 string getStatus() const;
+int getMaxHealth() const;
 
 bool isAlive() const;
 void takeDamage(int damage);
 virtual void attack(Monster& target);
 void applyStatusEffect(string effect, int duration);
 void effectStatus();
+void reset();
 
 ~Monster();
 
@@ -28,5 +30,7 @@ int statusDuration;
 int effectChance;
 int effectDuration;  
 string specialEffect;
+int maxHealth;
+
 
 };

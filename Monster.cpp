@@ -3,7 +3,7 @@
 
 
 
-Monster::Monster(string name, int health, int strength, string specialEffect, int effectChance, int effectDuration): name(name), health(health), strength(strength), specialEffect(specialEffect), effectChance(effectChance), effectDuration(effectDuration), currentStatus(""), statusDuration(0) {}
+Monster::Monster(string name, int health, int strength, string specialEffect, int effectChance, int effectDuration): name(name), health(health), maxHealth(health), strength(strength), specialEffect(specialEffect), effectChance(effectChance), effectDuration(effectDuration), currentStatus(""), statusDuration(0) {}
 
 string Monster::getName() const 
 {
@@ -18,6 +18,11 @@ int Monster::getHealth() const
 int Monster::getStrength() const 
 {
     return strength;
+}
+
+int Monster::getMaxHealth() const 
+{
+    return maxHealth;
 }
 
 bool Monster::isAlive() const 
@@ -116,6 +121,13 @@ void Monster::effectStatus()
             cout << name << " is no longer bleeding!" << endl;
         }
     }
+}
+
+void Monster::reset()
+{
+    health = maxHealth;
+    currentStatus = "";
+    statusDuration = 0;
 }
 
 Monster::~Monster() {}

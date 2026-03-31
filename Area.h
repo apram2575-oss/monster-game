@@ -13,6 +13,7 @@ string getName() const;
 string getDescription() const;
 void addEnemy(Enemy* enemy);
 vector<Enemy*> getEnemies() const;
+void removeEnemy(Enemy* enemy);
 
 ~Area();
 

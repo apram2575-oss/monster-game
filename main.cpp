@@ -23,48 +23,7 @@ Character* createCharacter()
     return player;
 }
 
-void mainMenu(Character* player)
-{
-    while (true)
-    {
-    cout << "--- Main Menu ---" << endl;
-    cout << "1. New Game" << endl;
-    cout << "2. Quit" << endl;
-    cout << "Enter your choice: ";
-    int choice;
-    cin >> choice;
-    
-    if (choice == 1)
-    {
-        player = createCharacter();
-    }
-    if (choice == 2)
-    {
-        cout << "Are you sure you want to quit? (y/n): ";
-        char confirm;
-        cin >> confirm;
-        if (confirm == 'y' || confirm == 'Y')
-        {
-            cout << "Are you really sure you want to quit? (y/n): ";
-            cin >> confirm;
-            if (confirm == 'y' || confirm == 'Y')
-            {
-                delete player;
-                return; 
-            }
-            else if (confirm == 'n' || confirm == 'N')
-            {
-                continue; 
-            }
-        }
-        else if (confirm == 'n' || confirm == 'N')
-        {
-            continue; 
-        }
-    }
 
-    } 
-}
 
 Monster* chooseMonster(Character* player) 
 {
@@ -82,10 +41,111 @@ Monster* chooseMonster(Character* player)
     return nullptr;
 }
 
+void clearScreen()
+{
+    cout << "\033[2J\033[1;1H";  // ANSI escape code to clear terminal
+}
+
 void showBattleStatus(Monster* playerMonster, Monster* enemyMonster) 
 {
-    cout << playerMonster->getName() << " - HP: " << playerMonster->getHealth() << ", STR: " << playerMonster->getStrength() << ", Status: " << playerMonster->getStatus() << endl;
-    cout << enemyMonster->getName() << " - HP: " << enemyMonster->getHealth() << ", STR: " << enemyMonster->getStrength() << ", Status: " << enemyMonster->getStatus() << endl;
+    clearScreen();
+    cout << "\n========================================" << endl;
+    cout << "  YOUR MONSTER" << endl;
+    cout << "  " << playerMonster->getName() 
+         << " | HP: " << playerMonster->getHealth() 
+         << "/" << playerMonster->getMaxHealth()
+         << " | STR: " << playerMonster->getStrength();
+    if (playerMonster->getStatus() != "")
+    {
+        cout << " | Status: " << playerMonster->getStatus();
+    }
+    cout << "\n----------------------------------------" << endl;
+    cout << "  ENEMY MONSTER" << endl;
+    cout << "  " << enemyMonster->getName() 
+         << " | HP: " << enemyMonster->getHealth()
+         << "/" << enemyMonster->getMaxHealth()
+         << " | STR: " << enemyMonster->getStrength();
+    if (enemyMonster->getStatus() != "")
+    {
+        cout << " | Status: " << enemyMonster->getStatus();
+    }
+    cout << "\n========================================\n" << endl;
+}
+
+
+void offerMonster(Character* player, const vector<Monster*>& defeatedMonsters) 
+{
+ 
+
+    cout << "You have the opportunity to add a defeated monster to your team!" << endl;
+    
+    for (size_t i = 0; i < defeatedMonsters.size(); ++i) 
+    {
+        cout << i + 1 << ". " << defeatedMonsters[i]->getName() << " (HP: " << defeatedMonsters[i]->getHealth() << ", STR: " << defeatedMonsters[i]->getStrength() << ")" << endl;
+    }
+    
+    cout << "Enter the number of the monster you want to add (or 0 to skip): ";
+    int choice;
+    cin >> choice;
+
+    if (choice > 0 && choice <= defeatedMonsters.size()) 
+    {
+        Monster* chosenMonster = defeatedMonsters[choice - 1];
+        
+        // Check if the player's party is full
+        if (player->getMonsters().size() >= 4) 
+        {
+            cout << "\n Your party is full! You can only carry 4 monsters." << endl;
+            cout << "Do you want to swap one of your current monsters for " << chosenMonster->getName() << "? (y/n): ";
+            char swapConfirm;
+            cin >> swapConfirm;
+            
+            if (swapConfirm == 'y' || swapConfirm == 'Y') 
+            {
+                cout << "\nChoose a monster to swap:" << endl;
+                for (size_t i = 0; i < player->getMonsters().size(); ++i) 
+                {
+                    cout << i + 1 << ". " << player->getMonsters()[i]->getName() << " (HP: " << player->getMonsters()[i]->getHealth() << ")" << endl;
+                }
+                
+                int swapChoice;
+                cout << "Enter the number to swap (or 0 to cancel): ";
+                cin >> swapChoice;
+                
+                if (swapChoice > 0 && swapChoice <= player->getMonsters().size()) 
+                {
+                    int indexToRelease = swapChoice - 1;
+                    cout << "Goodbye, " << player->getMonsters()[indexToRelease]->getName() << "!" << endl;
+                    
+                    // Remove the old monster and add the new one
+                    player->removeMonster(indexToRelease);
+                    chosenMonster->reset(); // Heal and reset status effects before adding
+                    player->addMonster(new Monster(*chosenMonster));
+                    
+                    cout << chosenMonster->getName() << " has joined your team!" << endl;
+                }
+                else
+                {
+                    cout << "Swap canceled. " << chosenMonster->getName() << " was not added." << endl;
+                }
+            }
+            else 
+            {
+                cout << chosenMonster->getName() << " was left behind." << endl;
+            }
+        }
+        else 
+        {
+            // Party isn't full, add normally
+            chosenMonster->reset(); // Heal and reset status effects before adding
+            player->addMonster(new Monster(*chosenMonster)); 
+            cout << chosenMonster->getName() << " has joined your team!" << endl;
+        }
+    } 
+    else 
+    {
+        cout << "Skipped. No monster added." << endl;
+    }
 }
 
 bool battle(Character* player, Enemy* enemy) 
@@ -127,7 +187,6 @@ bool battle(Character* player, Enemy* enemy)
 
         if (!currentDefender->isAlive()) 
         {
-            cout << currentDefender->getName() << " has been defeated!" << endl;
             break;
         }
 
@@ -150,123 +209,167 @@ bool battle(Character* player, Enemy* enemy)
     {
         cout << playerMonster->getName() << " has been defeated!" << endl;
         player->removeDefeatedMonsters();
-        if (player->hasMonsters()) 
-        {
-            Monster* playerMonster = chooseMonster(player); // Player chooses next monster
-            cout << player->getName() << " sends out " << playerMonster->getName() << "!" << endl;
-        }
+    
+        
     }
 }
 
     if (player->hasMonsters()) 
     {
         cout << player->getName() << " wins the battle!" << endl;
+        for (Monster* m : player->getMonsters()) 
+        {
+            m->reset(); // Heal and reset status effects for surviving monsters
+        }
+
+        offerMonster(player, defeatedMonsters); // Offer the player a chance to add a defeated monster
+        for (Monster* m : defeatedMonsters) 
+        {
+            delete m; // Clean up defeated monsters
+        }
         return true;
     } 
     else 
     {
         cout << enemy->getName() << " wins the battle!" << endl;
+        for (Monster* m : defeatedMonsters) 
+        {
+            delete m; // Clean up defeated monsters
+        }
         return false;
     }
 
 }
 
 
-void offerMonster(Character* player, const vector<Monster*>& defeatedMonsters) 
+
+
+void adventureLoop(Character* player, const vector<Area*>& world)
 {
- 
-
-    cout << "You have the opportunity to add a defeated monster to your team!" << endl;
-    
-    for (int i = 0; i < defeatedMonsters.size(); ++i) 
+    while (true)
     {
-        cout << i + 1 << ". " << defeatedMonsters[i]->getName() << " (HP: " << defeatedMonsters[i]->getHealth() << ", STR: " << defeatedMonsters[i]->getStrength() << ")" << endl;
-    }
-    
-    cout << "Enter the number of the monster you want to add (or 0 to skip): ";
-    int choice;
-    cin >> choice;
-
-    if (choice > 0 && choice <= defeatedMonsters.size()) 
-    {
-        Monster* chosenMonster = defeatedMonsters[choice - 1];
+        cout << "--- Areas to explore ---" << endl;
+        for (size_t i = 0; i < world.size(); ++i)
+        {
+            cout << i + 1 << ". " << world[i]->getName() << ": " << world[i]->getDescription() << endl;
+        }
+        cout << "Enter the number of the area you want to explore (or 0 to quit): ";
+        int areaChoice;
+        cin >> areaChoice;
         
-        // Check if the player's party is full
-        if (player->getMonsters().size() >= 4) 
+        if (areaChoice == 0)
         {
-            cout << "\n Your party is full! You can only carry 4 monsters." << endl;
-            cout << "Do you want to swap one of your current monsters for " << chosenMonster->getName() << "? (y/n): ";
-            char swapConfirm;
-            cin >> swapConfirm;
-            
-            if (swapConfirm == 'y' || swapConfirm == 'Y') 
-            {
-                cout << "\nChoose a monster to swap:" << endl;
-                for (int i = 0; i < player->getMonsters().size(); ++i) 
-                {
-                    cout << i + 1 << ". " << player->getMonsters()[i]->getName() << " (HP: " << player->getMonsters()[i]->getHealth() << ")" << endl;
-                }
-                
-                int swapChoice;
-                cout << "Enter the number to swap (or 0 to cancel): ";
-                cin >> swapChoice;
-                
-                if (swapChoice > 0 && swapChoice <= player->getMonsters().size()) 
-                {
-                    int indexToRelease = swapChoice - 1;
-                    cout << "Goodbye, " << player->getMonsters()[indexToRelease]->getName() << "!" << endl;
-                    
-                    // Remove the old monster and add the new one
-                    player->removeMonster(indexToRelease);
-                    player->addMonster(new Monster(*chosenMonster));
-                    
-                    cout << chosenMonster->getName() << " has joined your team!" << endl;
-                }
-                else
-                {
-                    cout << "Swap canceled. " << chosenMonster->getName() << " was not added." << endl;
-                }
-            }
-            else 
-            {
-                cout << chosenMonster->getName() << " was left behind." << endl;
-            }
+            break;
         }
-        else 
+        if (areaChoice < 1 || areaChoice > world.size())
         {
-            // Party isn't full, add normally
-            player->addMonster(new Monster(*chosenMonster)); 
-            cout << chosenMonster->getName() << " has joined your team!" << endl;
+            cout << "Invalid choice. Please try again." << endl;
         }
-    } 
-    else 
-    {
-        cout << "Skipped. No monster added." << endl;
+
+        Area* area = world[areaChoice - 1];
+        cout << "You enter the " << area->getName() << ". " << area->getDescription() << endl;
+
+        vector<Enemy*> enemies = area->getEnemies();
+        if (enemies.empty())
+        {
+            cout << "This area is peaceful. No enemies to fight." << endl;
+            continue;
+        }
+
+        cout << "Enemies in this area:" << endl;
+        for (size_t i = 0; i < enemies.size(); ++i)
+        {
+            cout << i + 1 << ". " << enemies[i]->getName() << endl;
+        }
+        cout << "Enter the number of the enemy you want to fight (or 0 to go back): ";
+        int enemyChoice;
+        cin >> enemyChoice;
+        if (enemyChoice == 0)
+        {
+            continue;
+        }
+
+        if (enemyChoice < 1 || enemyChoice > enemies.size())
+        {
+            cout << "Invalid choice. Please try again." << endl;
+            continue;
+        }
+
+        Enemy* enemy = enemies[enemyChoice - 1];
+        bool playerWon = battle(player, enemy);
+        if (playerWon)
+        {
+            area->removeEnemy(enemy); // Remove defeated enemy from the area
+            delete enemy; 
+        }
+
+        if (!player->hasMonsters()) 
+        {
+            cout << "Game Over! You have been defeated. Return to the main menu." << endl;
+            return;
+        }
+
     }
 }
 
+void mainMenu(Character* player, const vector<Area*>& world)
+{
+    while (true)
+    {
+    cout << "--- Main Menu ---" << endl;
+    cout << "1. New Game" << endl;
+    cout << "2. Quit" << endl;
+    cout << "Enter your choice: ";
+    int choice;
+    cin >> choice;
+    
+    if (choice == 1)
+    {
+        delete player; // Clean up previous character if it exists
+        player = createCharacter();
+        adventureLoop(player, world);
+    }
+    if (choice == 2)
+    {
+        cout << "Are you sure you want to quit? (y/n): ";
+        char confirm;
+        cin >> confirm;
+        if (confirm == 'y' || confirm == 'Y')
+        {
+            cout << "Are you really sure you want to quit? (y/n): ";
+            cin >> confirm;
+            if (confirm == 'y' || confirm == 'Y')
+            {
+                delete player;
+                return; 
+            }
+            else if (confirm == 'n' || confirm == 'N')
+            {
+                continue; 
+            }
+        }
+        else if (confirm == 'n' || confirm == 'N')
+        {
+            continue; 
+        }
+    }
+
+    } 
+}
 
 int main() 
 {     
     // Main game loop
-    cout << "Welcome to the Monster Battle Game!" << endl;
-    Character* player = createCharacter();
-    mainMenu(player);
-    vector<Area*> world = setupWorld();
+    srand(time(0)); // Ensures different random outcomes each time the game is played
 
+    cout << "Welcome to the Monster Battle Game!" << endl;
+    vector<Area*> world = setupWorld(); // Set up the game world before main menu
+    Character* player = nullptr;  // Use nullptr for so the changes won't be lost
+    mainMenu(player, world);
+    
     for (Area* area : world) 
     {
-        cout << "You enter the " << area->getName() << ": " << area->getDescription() << endl;
-        for (Enemy* enemy : area->getEnemies()) 
-        {
-            cout << "You encounter " << enemy->getName() << "!" << endl;
-            bool playerWon = battle(player, enemy);
-            if (!playerWon) 
-            {
-                cout << "Game Over! You were defeated by " << enemy->getName() << "." << endl;
-                return 0; 
-            }
-        }
+        delete area; // Clean up areas
     }
     
 

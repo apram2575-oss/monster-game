@@ -23,6 +23,18 @@ vector<Enemy*> Area::getEnemies() const
     return enemies;
 }
 
+void Area::removeEnemy(Enemy* enemy) 
+{
+    for (auto it = enemies.begin(); it != enemies.end(); ++it) 
+    {
+        if (*it == enemy) 
+        {
+            enemies.erase(it); // Remove the pointer from the vector
+            return;
+        }
+    }
+}
+
 Area::~Area() 
 {
     for (Enemy* e : enemies) 
