@@ -19,6 +19,7 @@ bool hasMonsters() const;
 void addMonster(Monster* monster);
 void swapMonster(int index, Monster* newMonster);
 void removeDefeatedMonsters();
+void removeMonster(int index);
 
 virtual ~Character();
 

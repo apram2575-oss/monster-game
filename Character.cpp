@@ -64,13 +64,22 @@ void Character::removeDefeatedMonsters()
     {
         if (!(*it)->isAlive()) 
         {
-            delete *it; // Clean up the defeated monster
             it = monsters.erase(it); // Remove from vector
         } 
         else 
         {
             ++it;
         }
+    }
+}
+
+
+void Character::removeMonster(int index) 
+{
+    if (index >= 0 && index < monsters.size()) 
+    {
+        delete monsters[index]; // Clean up the monster
+        monsters.erase(monsters.begin() + index); // Remove from vector
     }
 }
 
