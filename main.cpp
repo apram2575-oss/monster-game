@@ -34,6 +34,8 @@ Monster* chooseMonster(Character* player)
     }
     int choice;
     cin >> choice;
+    cin.ignore(); // Consume newline after integer input
+
     if (choice > 0 && choice <= player->getMonsters().size()) 
     {
         return player->getMonsters()[choice - 1];
@@ -87,6 +89,7 @@ void offerMonster(Character* player, const vector<Monster*>& defeatedMonsters)
     cout << "Enter the number of the monster you want to add (or 0 to skip): ";
     int choice;
     cin >> choice;
+    cin.ignore(); // Consume newline after integer input
 
     if (choice > 0 && choice <= defeatedMonsters.size()) 
     {
@@ -99,6 +102,7 @@ void offerMonster(Character* player, const vector<Monster*>& defeatedMonsters)
             cout << "Do you want to swap one of your current monsters for " << chosenMonster->getName() << "? (y/n): ";
             char swapConfirm;
             cin >> swapConfirm;
+            cin.ignore(); // Consume newline after char input
             
             if (swapConfirm == 'y' || swapConfirm == 'Y') 
             {
@@ -158,7 +162,16 @@ bool battle(Character* player, Enemy* enemy)
     {
     Monster* playerMonster = chooseMonster(player); // Player picks their monster
 
-   Monster* enemyMonster = enemy->getMonsters()[0]; // Enemy starts with their first monster
+    vector<Monster*> aliveMonsters; // Gets a random alive monster from the enemy
+    for (Monster* m : enemy->getMonsters())
+    {
+        if (m->isAlive())
+        {
+            aliveMonsters.push_back(m);
+        }
+    }
+    Monster* enemyMonster = aliveMonsters[rand() % aliveMonsters.size()];
+    
 
    bool whoStarts = rand() % 2; // Randomly decide who starts
    if (whoStarts == 0)
@@ -256,6 +269,7 @@ void adventureLoop(Character* player, const vector<Area*>& world)
         cout << "Enter the number of the area you want to explore (or 0 to quit): ";
         int areaChoice;
         cin >> areaChoice;
+        cin.ignore(); // So you don't have to press enter twice after choosing an area
         
         if (areaChoice == 0)
         {
@@ -284,6 +298,8 @@ void adventureLoop(Character* player, const vector<Area*>& world)
         cout << "Enter the number of the enemy you want to fight (or 0 to go back): ";
         int enemyChoice;
         cin >> enemyChoice;
+        cin.ignore(); // So you don't have to press enter twice after choosing an enemy
+
         if (enemyChoice == 0)
         {
             continue;
@@ -322,6 +338,7 @@ void mainMenu(Character* player, const vector<Area*>& world)
     cout << "Enter your choice: ";
     int choice;
     cin >> choice;
+    cin.ignore(); // To consume the newline character after the choice input
     
     if (choice == 1)
     {

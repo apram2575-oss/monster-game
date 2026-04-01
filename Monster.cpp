@@ -3,7 +3,7 @@
 
 
 
-Monster::Monster(string name, int health, int strength, string specialEffect, int effectChance, int effectDuration): name(name), health(health), maxHealth(health), strength(strength), specialEffect(specialEffect), effectChance(effectChance), effectDuration(effectDuration), currentStatus(""), statusDuration(0) {}
+Monster::Monster(string name, int health, int strength, string specialEffect, int effectChance, int effectDuration, int critChance, float critMultiplier): name(name), health(health), maxHealth(health), strength(strength), specialEffect(specialEffect), effectChance(effectChance), effectDuration(effectDuration), currentStatus(""), statusDuration(0), critChance(critChance), critMultiplier(critMultiplier) {}
 
 string Monster::getName() const 
 {
@@ -56,13 +56,23 @@ void Monster::attack(Monster& target)
     {
         target.takeDamage(strength);
         cout << name << " attacks " << target.getName() << " for " << strength << " damage!" << endl;
+
+        int damage;
+        int critRoll = rand() % 100;
+        if (critRoll < critChance)
+        {
+            damage = static_cast<int>(strength * critMultiplier);
+            cout << "Critical hit! " << name << " deals an additional " << damage - strength << " damage!" << endl;
+        }
+        target.takeDamage(damage);
+
         if (specialEffect != "" && 0 < effectChance) 
         {
-           int roll = rand() % 100 + 1;
+           int roll = rand() % 100;
            if (roll < effectChance) 
            {
-            target.applyStatusEffect(currentStatus, statusDuration);
-            cout << name << " applies " << currentStatus << " to " << target.getName() << " for " << effectDuration << " turns!" << endl;
+            target.applyStatusEffect(specialEffect, effectDuration);
+            cout << name << " applies " << specialEffect << " to " << target.getName() << " for " << effectDuration << " turns!" << endl;
            }
         }
     }
@@ -86,7 +96,7 @@ void Monster::effectStatus()
         strength -= 5; 
         cout << name << " loses 2 strength due to the curse!" << endl;
         statusDuration--;
-        int roll = rand() % 100 + 1;
+        int roll = rand() % 100;
         if (roll < 20) 
         {
             takeDamage(strength);

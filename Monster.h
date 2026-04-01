@@ -4,7 +4,7 @@ using namespace std;
 
 class Monster {
 public:
-Monster(string name, int health, int strength, string specialEffect = "", int effectChance = 0, int effectDuration = 0);
+Monster(string name, int health, int strength, string specialEffect = "", int effectChance = 0, int effectDuration = 0, int critChance = 10, float critMultiplier = 1.5);
 
 string getName() const;
 int getHealth() const;
@@ -31,6 +31,8 @@ int effectChance;
 int effectDuration;  
 string specialEffect;
 int maxHealth;
+int critChance;
+float critMultiplier;
 
 
 };
