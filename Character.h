@@ -28,6 +28,7 @@ void swapItem(int index, Item* item);
 void removeItem(int index);
 std::vector<Item*> getInventory() const;
 int getInventoryCount() const;
+std::vector<Monster*> getAllMonsters() const;
 
 virtual ~Character();
 

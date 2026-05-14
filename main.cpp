@@ -36,6 +36,9 @@ void adventureLoop(Character* player, vector<Area*>& world)
 {
     int defeatedEnemyCount = 0;
     Cave* currentCave = generateCave(player, defeatedEnemyCount);
+    bool strangerAppeared = false;
+
+   
 
     while (true)
     {
@@ -79,8 +82,9 @@ void adventureLoop(Character* player, vector<Area*>& world)
                  << ". " << area->getDescription() << endl;
 
             // event on entering area
-            EventType event = rollEvent();
-            handleEvent(player, event);
+            bool hasItems = player->getInventoryCount() > 0;
+            EventType event = rollEvent(strangerAppeared, hasItems);
+            handleEvent(player, event, strangerAppeared);
 
             vector<Enemy*> enemies = area->getEnemies();
             if (enemies.empty())
@@ -122,8 +126,9 @@ void adventureLoop(Character* player, vector<Area*>& world)
                 cout << "\nA new cave has appeared!" << endl;
 
                 // event after winning
-                EventType postEvent = rollEvent();
-                handleEvent(player, postEvent);
+                bool hasItems = player->getInventoryCount() > 0;
+                EventType event = rollEvent(strangerAppeared, hasItems);
+                handleEvent(player, event, strangerAppeared);
             }
 
             if (!player->hasMonsters())

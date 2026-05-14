@@ -1,6 +1,5 @@
 
-#ifndef EVENTSYSTEM_H
-#define EVENTSYSTEM_H
+#pragma once
 
 #include "Character.h"
 #include "Monster.h"
@@ -16,7 +15,6 @@ enum class EventType
     MYSTERIOUS_STRANGER
 };
 
-EventType rollEvent();
-void handleEvent(Character* player, EventType event);
+EventType rollEvent(bool strangerAppeared, bool hasItems);
+void handleEvent(Character* player, EventType event, bool& strangerAppeared);
 
-#endif

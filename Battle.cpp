@@ -65,6 +65,42 @@ void playerTurn(Character* player, Monster* playerMonster, Monster* enemyMonster
 
         Item* item = inv[itemChoice - 1];
 
+        if (item->getEffect() == "resurrect")
+        {
+            vector<Monster*> allMonsters = player->getAllMonsters();  
+            vector<Monster*> defeated;
+
+            for (Monster* m : allMonsters)
+                if (!m->isAlive())
+                    defeated.push_back(m);
+
+            if (defeated.empty())
+            {
+                cout << "No defeated monsters to resurrect!" << endl;
+                playerMonster->attack(*enemyMonster);  // attack instead if no targets
+                return;
+            }
+
+            cout << "Choose a monster to resurrect:" << endl;
+            for (int i = 0; i < (int)defeated.size(); i++)
+                cout << i + 1 << ". " << defeated[i]->getName() << endl;
+
+            int reviveChoice;
+            cin >> reviveChoice;
+            cin.ignore();
+
+            if (reviveChoice > 0 && reviveChoice <= (int)defeated.size())
+            {
+                defeated[reviveChoice - 1]->reset();
+                cout << defeated[reviveChoice - 1]->getName() 
+                    << " has been resurrected!" << endl;
+            }
+
+            // remove item once here and return
+            player->removeItem(itemChoice - 1);
+            return;
+        }
+
         // determine target based on item
         if (item->getTarget() == "enemy")
             item->use(enemyMonster);
@@ -74,6 +110,8 @@ void playerTurn(Character* player, Monster* playerMonster, Monster* enemyMonster
         // remove if single use
         if (!item->isReusable())
             player->removeItem(itemChoice - 1);
+            
+        
     }
 }
 

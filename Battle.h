@@ -4,6 +4,7 @@
 #include "Character.h"
 #include "Enemy.h"
 #include "Monster.h"
+#include "Item.h"
 #include <vector>
 
 Monster* chooseMonster(Character* player);

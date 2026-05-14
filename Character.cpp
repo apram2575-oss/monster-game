@@ -119,6 +119,11 @@ int Character::getInventoryCount() const
     return inventory.size();
 }
 
+vector<Monster*> Character::getAllMonsters() const
+{
+    return monsters;  // contains all monsters including defeated ones, since we only remove them from the active team but not delete them until the end of battle
+}
+
 Character::~Character() 
 {
     for (Monster* monster : monsters) 
