@@ -1,6 +1,6 @@
 #include "Character.h"
 
-
+using namespace std;
 
 Character::Character(string name) : name(name) {}
 
@@ -83,10 +83,50 @@ void Character::removeMonster(int index)
     }
 }
 
+void Character::addItem(Item* item)
+{
+    if (inventory.size() < 5)
+        inventory.push_back(item);
+    else
+        cout << "Inventory full!" << endl;
+}
+
+void Character::swapItem(int index, Item* item)
+{
+    if (index >= 0 && index < (int)inventory.size())
+    {
+        delete inventory[index];
+        inventory[index] = item;
+    }
+}
+
+void Character::removeItem(int index)
+{
+    if (index >= 0 && index < (int)inventory.size())
+    {
+        delete inventory[index];
+        inventory.erase(inventory.begin() + index);
+    }
+}
+
+vector<Item*> Character::getInventory() const
+{
+    return inventory;
+}
+
+int Character::getInventoryCount() const
+{
+    return inventory.size();
+}
+
 Character::~Character() 
 {
     for (Monster* monster : monsters) 
     {
         delete monster; // Clean up all monsters
+    }
+    for (Item* item : inventory)
+    {
+        delete item; // Clean up all items
     }
 }

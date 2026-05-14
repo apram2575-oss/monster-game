@@ -2,7 +2,7 @@
 #include "Area.h"
 #include "Monster.h"
 #include "Enemy.h"
-
+using namespace std;
 vector<Area*> setupWorld() 
 {
 

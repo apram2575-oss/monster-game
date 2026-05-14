@@ -3,15 +3,15 @@
 #include "Character.h"
 #include "Monster.h"
 
-using namespace std;
+
 
 class Enemy : public Character {
 
 public:
 
-Enemy(string name, string area);
+Enemy(std::string name, std::string area);
 int getDifficulty() const;
-string getArea() const;
+std::string getArea() const;
 
 
 
@@ -19,6 +19,6 @@ string getArea() const;
 private:
 
 int difficulty;
-string area;
+std::string area;
 
 };

@@ -2,24 +2,23 @@
 #include <string>
 #include "Enemy.h"
 
-using namespace std;
 
 class Area {
 
 public:
 
-Area(string name, string description);
-string getName() const;
-string getDescription() const;
+Area(std::string name, std::string description);
+std::string getName() const;
+std::string getDescription() const;
 void addEnemy(Enemy* enemy);
-vector<Enemy*> getEnemies() const;
+std::vector<Enemy*> getEnemies() const;
 void removeEnemy(Enemy* enemy);
 
 ~Area();
 
 private:
-string name;
-string description;
-vector<Enemy*> enemies;
+std::string name;
+std::string description;
+std::vector<Enemy*> enemies;
 
 };

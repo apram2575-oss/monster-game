@@ -55,6 +55,8 @@ void adventureLoop(Character* player, const vector<Area*>& world)
 
         Area* area = world[areaChoice - 1];
         cout << "You enter the " << area->getName() << ". " << area->getDescription() << endl;
+        EventType event = rollEvent();
+        handleEvent(player, event);
 
         vector<Enemy*> enemies = area->getEnemies();
         if (enemies.empty())
@@ -90,6 +92,9 @@ void adventureLoop(Character* player, const vector<Area*>& world)
         {
             area->removeEnemy(enemy); // Remove defeated enemy from the area
             delete enemy; 
+
+            EventType event = rollEvent();
+            handleEvent(player, event);
         }
 
         if (!player->hasMonsters()) 

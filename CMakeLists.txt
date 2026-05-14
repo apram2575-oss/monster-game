@@ -12,5 +12,6 @@ add_executable(main
     GameData.cpp
     EventSystem.cpp
     Battle.cpp
+    Item.cpp
 
 )

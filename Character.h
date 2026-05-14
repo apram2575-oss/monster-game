@@ -3,15 +3,17 @@
 #include <vector>
 #include <iostream>
 #include "Monster.h"
+#include "Item.h"
 
-using namespace std;
+
+
 
 class Character {
 
 public:
-Character(string name);
-string getName() const;
-vector<Monster*> getMonsters() const;
+Character(std::string name);
+std::string getName() const;
+std::vector<Monster*> getMonsters() const;
 int getMonsterCount() const;
 bool hasMonsters() const;
 
@@ -21,11 +23,18 @@ void swapMonster(int index, Monster* newMonster);
 void removeDefeatedMonsters();
 void removeMonster(int index);
 
+void addItem(Item* item);
+void swapItem(int index, Item* item);
+void removeItem(int index);
+std::vector<Item*> getInventory() const;
+int getInventoryCount() const;
+
 virtual ~Character();
 
 protected:
-string name;
-vector<Monster*> monsters;
+std::string name;
+std::vector<Monster*> monsters;
+std::vector<Item*> inventory;
 
 };
  

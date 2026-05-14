@@ -21,6 +21,62 @@ Monster* chooseMonster(Character* player)
     return nullptr;
 }
 
+void playerTurn(Character* player, Monster* playerMonster, Monster* enemyMonster)
+{
+    cout << "\nYour turn!" << endl;
+    cout << "1. Attack" << endl;
+    cout << "2. Use item" << endl;
+    int choice;
+    cin >> choice;
+    cin.ignore();
+
+    if (choice == 1)
+    {
+        playerMonster->attack(*enemyMonster);
+    }
+    else if (choice == 2)
+    {
+        if (player->getInventoryCount() == 0)
+        {
+            cout << "No items! Attacking instead." << endl;
+            playerMonster->attack(*enemyMonster);
+            return;
+        }
+
+        // show inventory
+        vector<Item*> inv = player->getInventory();
+        for (size_t i = 0; i < inv.size(); i++)
+        {
+            cout << i + 1 << ". " << inv[i]->getName() 
+                 << " - " << inv[i]->getDescription() << endl;
+        }
+        cout << "0. Cancel" << endl;
+
+        int itemChoice;
+        cin >> itemChoice;
+        cin.ignore();
+
+        if (itemChoice < 1 || itemChoice > (int)inv.size())
+        {
+            cout << "Cancelled! Attacking instead." << endl;
+            playerMonster->attack(*enemyMonster);
+            return;
+        }
+
+        Item* item = inv[itemChoice - 1];
+
+        // determine target based on item
+        if (item->getTarget() == "enemy")
+            item->use(enemyMonster);
+        else
+            item->use(playerMonster);
+
+        // remove if single use
+        if (!item->isReusable())
+            player->removeItem(itemChoice - 1);
+    }
+}
+
 void clearScreen()
 {
     cout << "\033[2J\033[1;1H";  // ANSI escape code to clear terminal
@@ -169,7 +225,14 @@ bool battle(Character* player, Enemy* enemy)
 
     while (playerMonster->isAlive() && enemyMonster->isAlive()) 
     {
-        currentAttacker->attack(*currentDefender);
+        if (currentAttacker == playerMonster)
+        {
+            playerTurn(player, playerMonster, enemyMonster);
+        }
+        else
+        {
+            enemyMonster->attack(*playerMonster);
+        }
 
         showBattleStatus(playerMonster, enemyMonster);
 

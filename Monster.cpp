@@ -1,7 +1,7 @@
 #include "Monster.h"
 #include <iostream>
 
-
+using namespace std;
 
 Monster::Monster(string name, int health, int strength, string specialEffect, int effectChance, int effectDuration, int critChance, float critMultiplier): name(name), health(health), maxHealth(health), strength(strength), specialEffect(specialEffect), effectChance(effectChance), effectDuration(effectDuration), currentStatus(""), statusDuration(0), critChance(critChance), critMultiplier(critMultiplier) {}
 
@@ -137,6 +137,25 @@ void Monster::reset()
     health = maxHealth;
     currentStatus = "";
     statusDuration = 0;
+}
+
+void Monster::heal(int amount)
+{
+    health += amount;
+    if (health > maxHealth)
+        health = maxHealth;
+    cout << name << " healed for " << amount << " HP!" << endl;
+}
+
+void Monster::boostStrength(int amount)
+{
+    strength += amount;
+    cout << name << " strength boosted by " << amount << "!" << endl;
+}
+
+void Monster::doubleStatusDuration()
+{
+    statusDuration *= 2;
 }
 
 Monster::~Monster() {}

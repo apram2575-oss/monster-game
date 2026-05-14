@@ -1,5 +1,5 @@
 #include "Area.h"
-
+using namespace std;
 
 Area::Area(string name, string description) : name(name), description(description) {}
 

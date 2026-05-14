@@ -2,8 +2,8 @@
 #include <vector> 
 #include "Area.h"
 
-using namespace std;
 
 
 
-vector<Area*> setupWorld();
+
+std::vector<Area*> setupWorld();
