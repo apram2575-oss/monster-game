@@ -308,3 +308,55 @@ bool battle(Character* player, Enemy* enemy)
     }
 
 }
+
+bool caveBattle(Character* player, Monster* caveMonster)
+{
+    vector<Monster*> defeatedMonsters;
+
+    cout << "\n=== CAVE BATTLE ===" << endl;
+
+    while (player->hasMonsters() && caveMonster->isAlive())
+    {
+        Monster* playerMonster = chooseMonster(player);
+
+        bool playerFirst = rand() % 2 == 0;
+        if (playerFirst)
+            cout << playerMonster->getName() << " goes first!" << endl;
+        else
+            cout << caveMonster->getName() << " goes first!" << endl;
+
+        Monster* attacker = playerFirst ? playerMonster : caveMonster;
+        Monster* defender = playerFirst ? caveMonster : playerMonster;
+
+        while (playerMonster->isAlive() && caveMonster->isAlive())
+        {
+            if (attacker == playerMonster)
+                playerTurn(player, playerMonster, caveMonster);
+            else
+                caveMonster->attack(*playerMonster);
+
+            showBattleStatus(playerMonster, caveMonster);
+
+            playerMonster->effectStatus();
+            caveMonster->effectStatus();
+
+            if (!playerMonster->isAlive() || !caveMonster->isAlive())
+                break;
+
+            swap(attacker, defender);
+        }
+
+        if (!playerMonster->isAlive())
+        {
+            cout << "Your " << playerMonster->getName() 
+                 << " was defeated!" << endl;
+            player->removeDefeatedMonsters();
+        }
+    }
+
+    if (caveMonster->isAlive())
+        return false;
+
+    cout << caveMonster->getName() << " was defeated!" << endl;
+    return true;
+}

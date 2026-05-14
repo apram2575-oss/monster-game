@@ -8,25 +8,32 @@ Item::Item(string name, string description, string effect, string target, int va
 
 Item::~Item() {}
 
-string Item::getName() const { 
+string Item::getName() const 
+{ 
     return name; 
 }
-string Item::getDescription() const { 
+string Item::getDescription() const 
+{ 
     return description; 
 }
-string Item::getEffect() const { 
+string Item::getEffect() const 
+{ 
     return effect; 
 }
-string Item::getTarget() const { 
+string Item::getTarget() const 
+{ 
     return target; 
 }
-int Item::getValue() const { 
+int Item::getValue() const 
+{ 
     return value; 
 }
-string Item::getStatusEffect() const { 
+string Item::getStatusEffect() const 
+{ 
     return statusEffect; 
 }
-bool Item::isReusable() const { 
+bool Item::isReusable() const 
+{ 
     return reusable; 
 }
 

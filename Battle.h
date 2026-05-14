@@ -12,3 +12,4 @@ void showBattleStatus(Monster* playerMonster, Monster* enemyMonster);
 void offerMonster(Character* player, const std::vector<Monster*>& defeatedMonsters);
 bool battle(Character* player, Enemy* enemy);
 void playerTurn(Character* player, Monster* playerMonster, Monster* enemyMonster);
+bool caveBattle(Character* player, Monster* caveMonster);

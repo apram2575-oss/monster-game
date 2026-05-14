@@ -13,5 +13,6 @@ add_executable(main
     EventSystem.cpp
     Battle.cpp
     Item.cpp
+    Cave.cpp
 
 )
