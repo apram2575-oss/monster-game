@@ -54,10 +54,9 @@ void Monster::attack(Monster& target)
 {
     if (isAlive()) 
     {
-        target.takeDamage(strength);
         cout << name << " attacks " << target.getName() << " for " << strength << " damage!" << endl;
 
-        int damage;
+        int damage = strength;
         int critRoll = rand() % 100;
         if (critRoll < critChance)
         {

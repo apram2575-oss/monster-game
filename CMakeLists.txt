@@ -10,4 +10,7 @@ add_executable(main
     Enemy.cpp
     Area.cpp
     GameData.cpp
+    EventSystem.cpp
+    Battle.cpp
+
 )
