@@ -14,5 +14,9 @@ add_executable(main
     Battle.cpp
     Item.cpp
     Cave.cpp
+    DataBase.cpp
 
 )
+
+
+target_link_libraries(main sqlite3)

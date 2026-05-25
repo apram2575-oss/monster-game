@@ -4,6 +4,7 @@
 #include "Character.h"
 #include "Monster.h"
 #include "Enemy.h"
+#include "DataBase.h"
 
 enum class EventType 
 {
@@ -11,10 +12,10 @@ enum class EventType
     RANDOM_ENEMY,
     SALESMAN,
     ABANDONED_MONSTER,
-    HEALING_SPRING,
+    MAGICAL_SPRING,
     MYSTERIOUS_STRANGER
 };
 
 EventType rollEvent(bool strangerAppeared, bool hasItems);
-void handleEvent(Character* player, EventType event, bool& strangerAppeared);
+void handleEvent(Character* player, EventType event, bool& strangerAppeared, Stats& stats);
 

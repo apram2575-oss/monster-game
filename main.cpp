@@ -10,6 +10,7 @@
 #include <vector>
 #include "Item.h"
 #include "Cave.h"
+#include "DataBase.h"
 
 using namespace std;
 
@@ -32,12 +33,13 @@ Character* createCharacter()
 
 
 
-void adventureLoop(Character* player, vector<Area*>& world)
+void adventureLoop(Character* player, vector<Area*>& world, Stats& stats, Database& db, int characterId)
 {
     int defeatedEnemyCount = 0;
     Cave* currentCave = generateCave(player, defeatedEnemyCount);
     bool strangerAppeared = false;
 
+ 
    
 
     while (true)
@@ -84,7 +86,7 @@ void adventureLoop(Character* player, vector<Area*>& world)
             // event on entering area
             bool hasItems = player->getInventoryCount() > 0;
             EventType event = rollEvent(strangerAppeared, hasItems);
-            handleEvent(player, event, strangerAppeared);
+            handleEvent(player, event, strangerAppeared, stats);
 
             vector<Enemy*> enemies = area->getEnemies();
             if (enemies.empty())
@@ -112,11 +114,22 @@ void adventureLoop(Character* player, vector<Area*>& world)
             }
 
             Enemy* enemy = enemies[enemyChoice - 1];
-            bool playerWon = battle(player, enemy);
+            bool playerWon = battle(player, enemy, stats);
+            vector<pair<string,string>> defeatedEnemies; // vector to save defeated enemies for database saving
 
             if (playerWon)
             {
                 area->removeEnemy(enemy);
+                defeatedEnemies.push_back(make_pair(area->getName(), enemy->getName())); // when enemy gets defeated
+                stats.totalMonstersDefeated++;
+
+                cout << "DEBUG: characterId = " << characterId << endl;
+                cout << "DEBUG: Saving defeated enemy " << enemy->getName() 
+                     << " in " << area->getName() << endl;
+               
+                db.saveDefeatedEnemy(characterId, area->getName(), enemy->getName());
+                
+
                 delete enemy;
                 defeatedEnemyCount++;
 
@@ -128,7 +141,7 @@ void adventureLoop(Character* player, vector<Area*>& world)
                 // event after winning
                 bool hasItems = player->getInventoryCount() > 0;
                 EventType event = rollEvent(strangerAppeared, hasItems);
-                handleEvent(player, event, strangerAppeared);
+                handleEvent(player, event, strangerAppeared, stats);
             }
 
             if (!player->hasMonsters())
@@ -159,7 +172,7 @@ void adventureLoop(Character* player, vector<Area*>& world)
                 }
 
                 cout << "\nA " << caveMonster->getName() << " appears!" << endl;
-                bool playerWon = caveBattle(player, caveMonster);
+                bool playerWon = caveBattle(player, caveMonster, stats);
 
                 if (!playerWon)
                 {
@@ -234,68 +247,177 @@ void adventureLoop(Character* player, vector<Area*>& world)
     delete currentCave;
 }
 
-void mainMenu(Character* player, vector<Area*>& world)
-{
-    while (true)
+void mainMenu(Character*& player, vector<Area*>& world,
+    Stats& stats, Database& db, int& characterId)
     {
-    cout << "--- Main Menu ---" << endl;
-    cout << "1. New Game" << endl;
-    cout << "2. Quit" << endl;
-    cout << "Enter your choice: ";
-    int choice;
-    cin >> choice;
-    cin.ignore(); // To consume the newline character after the choice input
-    
-    if (choice == 1)
-    {
-        delete player; // Clean up previous character if it exists
+        while (true)
+        {
+        cout << "\n--- Main Menu ---" << endl;
+        cout << "1. New Game" << endl;
+        cout << "2. Start Adventure" << endl;
+        cout << "3. Save Game" << endl;
+        cout << "4. View Stats" << endl;
+        cout << "5. Quit" << endl;
+        cout << "Choice: ";
+
+        int choice;
+        cin >> choice;
+        cin.ignore();
+
+        if (choice == 1)
+        {
+        delete player;
         player = createCharacter();
-        adventureLoop(player, world);
-    }
-    if (choice == 2)
-    {
-        cout << "Are you sure you want to quit? (y/n): ";
+        stats = Stats();  // reset stats for new game
+        characterId = -1;
+        }
+        else if (choice == 2)
+        {
+        if (player == nullptr)
+        {
+            cout << "Create a character first!" << endl;
+            continue;
+        }
+        adventureLoop(player, world, stats, db, characterId);
+        }
+        else if (choice == 3)
+        {
+        if (player == nullptr)
+        {
+            cout << "No character to save!" << endl;
+            continue;
+        }
+        db.saveCharacter(player, stats, world);
+        // update characterId if first save
+        if (characterId == -1)
+        {
+            vector<HeroSummary> heroes = db.getAllHeroes();
+            for (auto& h : heroes)
+                if (h.name == player->getName())
+                    characterId = h.id;
+        }
+        }
+        else if (choice == 4)
+        {
+        if (characterId == -1)
+            cout << "Save your game first to see stats!" << endl;
+        else
+            db.printStats(characterId);
+        }
+        else if (choice == 5)
+        {
+        cout << "Are you sure? (y/n): ";
         char confirm;
         cin >> confirm;
+        cin.ignore();
         if (confirm == 'y' || confirm == 'Y')
         {
-            cout << "Are you really sure you want to quit? (y/n): ";
-            cin >> confirm;
-            if (confirm == 'y' || confirm == 'Y')
-            {
-                delete player;
-                return; 
-            }
-            else if (confirm == 'n' || confirm == 'N')
-            {
-                continue; 
-            }
+            delete player;
+            return;
         }
-        else if (confirm == 'n' || confirm == 'N')
-        {
-            continue; 
         }
     }
-
-    } 
 }
 
-int main() 
-{     
-    // Main game loop
-    srand(time(0)); // Ensures different random outcomes each time the game is played
 
+int main()
+{
+    srand(time(0));
+    
     cout << "Welcome to the Monster Battle Game!" << endl;
-    vector<Area*> world = setupWorld(); // Set up the game world before main menu
-    Character* player = nullptr;  // Use nullptr for so the changes won't be lost
-    mainMenu(player, world);
-    
-    for (Area* area : world) 
-    {
-        delete area; // Clean up areas
-    }
-    
 
+    Database db("monsters.db");
+    vector<Area*> world = setupWorld();
+    Character* player = nullptr;
+    Stats stats;
+    int characterId = -1;
+
+
+    while (true)
+    {
+        vector<HeroSummary> heroes = db.getAllHeroes();
+
+        cout << "\n=== SAVED HEROES ===" << endl;
+
+        if (heroes.empty())
+        {
+            cout << "No saved heroes. Starting new game!" << endl;
+            break;
+        }
+
+        for (size_t i = 0; i < heroes.size(); i++)
+        {
+            cout << i + 1 << ". " << heroes[i].name
+                 << " | Monsters: " << heroes[i].monsterCount
+                 << " | Defeated: " << heroes[i].totalMonstersDefeated
+                 << " | Items: " << heroes[i].itemCount
+                 << endl;
+        }
+        cout << heroes.size() + 1 << ". New Game" << endl;
+        cout << heroes.size() + 2 << ". Delete a hero" << endl;
+        cout << "Choice: ";
+
+        int heroChoice;
+        cin >> heroChoice;
+        cin.ignore();
+
+        if (heroChoice > 0 && heroChoice <= (int)heroes.size())
+        {
+            // load existing hero
+            characterId = heroes[heroChoice - 1].id;
+            player = db.loadCharacter(characterId, stats, world);
+            break;  // valid choice, exit loop
+        }
+        else if (heroChoice == (int)heroes.size() + 1)
+        {
+            // new game
+            break;  // exit loop, player creates character in main menu
+        }
+        else if (heroChoice == (int)heroes.size() + 2)
+        {
+            // delete a hero
+            cout << "\nChoose a hero to delete:" << endl;
+            for (size_t i = 0; i < heroes.size(); i++)
+                cout << i + 1 << ". " << heroes[i].name << endl;
+            cout << "0. Cancel" << endl;
+            cout << "Choice: ";
+
+            int deleteChoice;
+            cin >> deleteChoice;
+            cin.ignore();
+
+            if (deleteChoice > 0 && deleteChoice <= (int)heroes.size())
+            {
+                cout << "Are you sure you want to delete "
+                     << heroes[deleteChoice - 1].name << "? (y/n): ";
+                char confirm;
+                cin >> confirm;
+                cin.ignore();
+
+                if (confirm == 'y' || confirm == 'Y')
+                {
+                    db.deleteHero(heroes[deleteChoice - 1].id);
+                    cout << heroes[deleteChoice - 1].name
+                         << " has been deleted!" << endl;
+                }
+                else
+                {
+                    cout << "Deletion cancelled." << endl;
+                }
+            }
+            // loop continues, shows updated hero list
+        }
+        else
+        {
+            cout << "Invalid choice!" << endl;
+            // loop continues
+        }
+    }
+
+    mainMenu(player, world, stats, db, characterId);
+
+    for (Area* area : world)
+        delete area;
 
     return 0;
 }

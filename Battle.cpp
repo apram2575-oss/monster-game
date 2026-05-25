@@ -21,7 +21,7 @@ Monster* chooseMonster(Character* player)
     return nullptr;
 }
 
-void playerTurn(Character* player, Monster* playerMonster, Monster* enemyMonster)
+void playerTurn(Character* player, Monster* playerMonster, Monster* enemyMonster, Stats& stats)
 {
     cout << "\nYour turn!" << endl;
     cout << "1. Attack" << endl;
@@ -109,7 +109,14 @@ void playerTurn(Character* player, Monster* playerMonster, Monster* enemyMonster
 
         // remove if single use
         if (!item->isReusable())
+        {
             player->removeItem(itemChoice - 1);
+        }
+
+        stats.itemUsageCount[item->getName()]++;
+
+        if (!enemyMonster->isAlive())
+            stats.itemKillCount[item->getName()]++;
             
         
     }
@@ -224,7 +231,7 @@ void offerMonster(Character* player, const vector<Monster*>& defeatedMonsters)
     }
 }
 
-bool battle(Character* player, Enemy* enemy)
+bool battle(Character* player, Enemy* enemy, Stats& stats)
 {
 
     vector<Monster*> defeatedMonsters; // To keep track of defeated monsters
@@ -265,7 +272,7 @@ bool battle(Character* player, Enemy* enemy)
     {
         if (currentAttacker == playerMonster)
         {
-            playerTurn(player, playerMonster, enemyMonster);
+            playerTurn(player, playerMonster, enemyMonster, stats);
         }
         else
         {
@@ -347,7 +354,7 @@ bool battle(Character* player, Enemy* enemy)
 
 }
 
-bool caveBattle(Character* player, Monster* caveMonster)
+bool caveBattle(Character* player, Monster* caveMonster, Stats& stats)
 {
     vector<Monster*> defeatedMonsters;
 
@@ -369,7 +376,7 @@ bool caveBattle(Character* player, Monster* caveMonster)
         while (playerMonster->isAlive() && caveMonster->isAlive())
         {
             if (attacker == playerMonster)
-                playerTurn(player, playerMonster, caveMonster);
+                playerTurn(player, playerMonster, caveMonster, stats);
             else
                 caveMonster->attack(*playerMonster);
 

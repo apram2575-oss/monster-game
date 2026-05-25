@@ -1,6 +1,7 @@
 #include "EventSystem.h"
 #include "Battle.h"
 #include "Item.h"
+#include "DataBase.h"
 #include <iostream>
 #include <cstdlib>
 using namespace std;
@@ -11,19 +12,19 @@ EventType rollEvent(bool strangerAppeared, bool hasItems)
     if (!strangerAppeared && hasItems)
     {
         int strangerRoll = rand() % 100;
-        if (strangerRoll < 30)  // 30% chance to appear
+        if (strangerRoll < 40)  // 40% chance to appear
             return EventType::MYSTERIOUS_STRANGER;
     }
 
     int roll = rand() % 100;
     if (roll < 30)       return EventType::NOTHING;
-    else if (roll < 50)  return EventType::RANDOM_ENEMY;
-    else if (roll < 65)  return EventType::SALESMAN;
+    else if (roll < 40)  return EventType::RANDOM_ENEMY;
+    else if (roll < 60)  return EventType::SALESMAN;
     else if (roll < 80)  return EventType::ABANDONED_MONSTER;
-    else                 return EventType::HEALING_SPRING;
+    else                 return EventType::MAGICAL_SPRING;
 }
 
-void handleEvent(Character* player, EventType event, bool& strangerAppeared)
+void handleEvent(Character* player, EventType event, bool& strangerAppeared, Stats& stats)
 {
     switch (event)
     {
@@ -35,18 +36,104 @@ void handleEvent(Character* player, EventType event, bool& strangerAppeared)
             cout << "\nA wild enemy appears!" << endl;
             Enemy* randomEnemy = new Enemy("Wandering Beast", "Wilderness");
             randomEnemy->addMonster(new Monster("Wild Wolf", 30, 8));
-            battle(player, randomEnemy);
+            battle(player, randomEnemy, stats);
             delete randomEnemy;
             break;
         }
 
+        
         case EventType::SALESMAN:
         {
             cout << "\nA travelling salesman appears!" << endl;
-            cout << "He offers to heal all your monsters for free!" << endl;
-            for (Monster* m : player->getMonsters())
-                m->reset();
-            cout << "All your monsters have been healed!" << endl;
+            cout << "??? : I have wares if you have coin... or items!" << endl;
+
+            // pool of items the salesman offers
+            vector<Item*> salesItems = {
+                new Item("Poison Grenade",
+                        "Deals 20 damage and poisons the enemy",
+                        "status", "enemy", 20, "poison"),
+                new Item("Heal Flask",
+                        "Restores one monster to full health",
+                        "heal", "friendly", 9999),
+                new Item("Burn Vial",
+                        "Deals 15 damage and burns the enemy",
+                        "status", "enemy", 15, "burn")
+            };
+
+            // pick a random item to offer
+            Item* offered = salesItems[rand() % salesItems.size()];
+
+            // clean up unchosen sales items
+            for (Item* i : salesItems)
+                if (i != offered)
+                    delete i;
+
+            cout << "??? : I offer you: " << offered->getName()
+                << " - " << offered->getDescription() << endl;
+
+            if (player->getInventoryCount() > 0)
+            {
+                cout << "??? : Give me one of your items in return." << endl;
+                cout << "\nYour inventory:" << endl;
+
+                vector<Item*> inv = player->getInventory();
+                for (int i = 0; i < (int)inv.size(); i++)
+                    cout << i + 1 << ". " << inv[i]->getName()
+                        << " - " << inv[i]->getDescription() << endl;
+                cout << "0. Decline" << endl;
+                cout << "Choice: ";
+
+                int choice;
+                cin >> choice;
+                cin.ignore();
+
+                if (choice > 0 && choice <= (int)inv.size())
+                {
+                    player->removeItem(choice - 1);
+
+                    if (player->getInventoryCount() < 5)
+                    {
+                        player->addItem(offered);
+                        cout << "??? : Pleasure doing business!" << endl;
+                        cout << offered->getName() << " added to inventory!" << endl;
+                    }
+                    else
+                    {
+                        cout << "Inventory full! Choose an item to swap:" << endl;
+                        vector<Item*> currentInv = player->getInventory();
+                        for (int i = 0; i < (int)currentInv.size(); i++)
+                            cout << i + 1 << ". " << currentInv[i]->getName() << endl;
+                        cout << "0. Cancel" << endl;
+
+                        int swapChoice;
+                        cin >> swapChoice;
+                        cin.ignore();
+
+                        if (swapChoice > 0 && swapChoice <= (int)currentInv.size())
+                        {
+                            player->swapItem(swapChoice - 1, offered);
+                            cout << offered->getName() << " added to inventory!" << endl;
+                        }
+                        else
+                        {
+                            cout << "??? : Changed your mind? Keep your junk then." << endl;
+                            delete offered;
+                        }
+                    }
+                }
+                else
+                {
+                    cout << "??? : No deal then. Good luck out there." << endl;
+                    delete offered;
+                }
+            }
+            else
+            {
+                // player has no items. salesman still appears but can't trade
+                cout << "??? : You have nothing worth trading..." << endl;
+                cout << "??? : Come back when you have something valuable." << endl;
+                delete offered;
+            }
             break;
         }
 
@@ -81,12 +168,16 @@ void handleEvent(Character* player, EventType event, bool& strangerAppeared)
             break;
         }
 
-        case EventType::HEALING_SPRING:
+        case EventType::MAGICAL_SPRING:
         {
-            cout << "\nYou discover a healing spring!" << endl;
-            cout << "All your monsters are fully healed!" << endl;
+            cout << "\nYou discover a magical spring!" << endl;
+            cout << "Your monsters feel a surge of power!" << endl;
             for (Monster* m : player->getMonsters())
-                m->reset();
+            {
+                int buff = max(1, (int)(m->getStrength() * 0.10f));  // 10% of strength, minimum 1
+                m->boostStrength(buff);
+                cout << m->getName() << " gained " << buff << " strength!" << endl;
+            }
             break;
         }
 
@@ -187,7 +278,7 @@ void handleEvent(Character* player, EventType event, bool& strangerAppeared)
                 Monster* blackCat = new Monster("May's Black Cat", 60, 20, "curse", 60, 3, 30, 2.5f);
 
                 cout << "You notice the cat has a mysterious aura and is coming right at you!" << endl;
-                bool playerWon = caveBattle(player, blackCat);
+                bool playerWon = caveBattle(player, blackCat, stats);
                 bool catResurrected = false;
 
 
@@ -204,7 +295,7 @@ void handleEvent(Character* player, EventType event, bool& strangerAppeared)
                         // reset cat but make it stronger second time
                         blackCat->reset();
 
-                        playerWon = caveBattle(player, blackCat);
+                        playerWon = caveBattle(player, blackCat, stats);
 
                         if (playerWon)
                         {

@@ -21,6 +21,11 @@ void reset();
 void heal(int amount);
 void boostStrength(int amount);
 void doubleStatusDuration();
+std::string getSpecialEffect() const;
+int getEffectChance() const;
+int getEffectDuration() const;
+int getCritChance() const;
+float getCritMultiplier() const;
 
 ~Monster();
 

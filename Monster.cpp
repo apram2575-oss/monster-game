@@ -158,4 +158,25 @@ void Monster::doubleStatusDuration()
     statusDuration *= 2;
 }
 
+string Monster::getSpecialEffect() const 
+{ 
+    return specialEffect; 
+}
+int Monster::getEffectChance() const 
+{ 
+    return effectChance; 
+}
+int Monster::getEffectDuration() const 
+{ 
+    return effectDuration; 
+}
+int Monster::getCritChance() const 
+{ 
+    return critChance; 
+}
+float Monster::getCritMultiplier() const 
+{ 
+    return critMultiplier; 
+}
+
 Monster::~Monster() {}
